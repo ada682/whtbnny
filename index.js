@@ -30,7 +30,7 @@ class WhiteBunnyGame {
     this.gameServer = null;
     this.socketIOSid = null;
     this.apiKey = 'your_api_key';
-    this.userId = '1118770958';
+    this.userId = 'your_tele_userid';
     this.isReconnecting = false;
     this.pingInterval = null;
     this.adInProgress = false;
