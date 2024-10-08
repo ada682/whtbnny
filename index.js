@@ -29,19 +29,19 @@ class WhiteBunnyGame {
     this.ws = null;
     this.gameServer = null;
     this.socketIOSid = null;
-    this.apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5waWJma3J4Y2VpamZhdm1zc3RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTgwMzY2NjksImV4cCI6MjAzMzYxMjY2OX0.tzFCWLAgY6nEVB8mMqHnNBn3p4iYXt9Z5U6lpE_1Iz0';
+    this.apiKey = 'your_api_key';
     this.userId = '1118770958';
     this.isReconnecting = false;
     this.pingInterval = null;
-	this.adInProgress = false;
+    this.adInProgress = false;
     this.currentAdRewardResolver = null;
-	this.reconnectAttempts = 0;
+    this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
     this.baseReconnectDelay = 1000;
-	this.rewardClaimAttempts = 0;
+    this.rewardClaimAttempts = 0;
     this.maxRewardClaimAttempts = 3;
     this.rewardClaimTimeout = 45000;
-	this.adDuration = 32000; 
+    this.adDuration = 32000; 
     this.rewardClaimRetries = 0;
     this.maxRewardClaimRetries = 3;
     this.rewardClaimDelay = 2000; 
@@ -482,7 +482,7 @@ class WhiteBunnyGame {
 
   async start() {
     try {
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZjE1ZThlZmVjN2Q0NWM0YWE0MWE5NiIsImlhdCI6MTcyNzg5NzA3NiwiZXhwIjoxNzkwOTY5MDc2fQ.1AIOECr5eFq8QFkjyV3goEQwAy2FnUgdwOyufly07HM';
+      const token = 'your_token';
       
       await this.initializeWithToken(token);
       
