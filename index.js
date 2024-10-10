@@ -1,13 +1,31 @@
-require('dotenv').config();
+const fs = require('fs');
 const WebSocket = require('ws');
 const axios = require('axios');
 
+function loadConfig() {
+  const config = {};
+  const data = fs.readFileSync('data.txt', 'utf-8');
+  data.split('\n').forEach(line => {
+    const [key, value] = line.split('=');
+    if (key && value) {
+      config[key.trim()] = value.trim();
+    }
+  });
+  return config;
+}
+
+const config = loadConfig();
+const token = config.TOKEN;
+const tgId = config.TG_ID;
+const parallelAds = parseInt(config.PARALLEL_ADS) || 1;
+const adViewInterval = parseInt(config.AD_VIEW_INTERVAL) || 60000;
+
 class WhiteBunnyBot {
-  constructor(token, tgId) {
+  constructor(token, tgId, parallelAds, adViewInterval) {
     this.token = token;
     this.tgId = tgId;
-    this.parallelAds = parseInt(process.env.PARALLEL_ADS) || 1; 
-    this.adViewInterval = parseInt(process.env.AD_VIEW_INTERVAL) || 60000;
+    this.parallelAds = parallelAds;
+    this.adViewInterval = adViewInterval;
     this.headers = {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
       'Accept': '*/*',
@@ -34,22 +52,23 @@ class WhiteBunnyBot {
   }
 
   log(message, data = null) {
-    if (this.debugMode) {
-      let color = '\x1b[37m'; 
-      if (message.includes('Starting to view ad')) {
-        color = '\x1b[37m'; 
-      } else if (message.includes('Points:')) {
-        color = '\x1b[33m'; 
-      } else if (message.includes('Reward response:') || message.includes('Ad view completed')) {
-        color = '\x1b[32m'; 
-      } else if (message.includes('Starting bot') || message.includes('Connecting to server') || message.includes('Connected to WebSocket')) {
-        color = '\x1b[36m'; 
-      }
-    
-      console.log(`${color}[${new Date().toISOString()}] ${message}\x1b[0m`);
-    
-      if (data) console.log(data);
+    let color = '\x1b[37m'; 
+
+    if (message.includes('Skipping failed view ad:')) {
+      color = '\x1b[31m'; 
+    } else if (message.includes('Starting to view ad')) {
+      color = '\x1b[37m'; 
+    } else if (message.includes('Points:')) {
+      color = '\x1b[33m'; 
+    } else if (message.includes('Reward response:') || message.includes('Ad view completed')) {
+      color = '\x1b[32m'; 
+    } else if (message.includes('Starting bot') || message.includes('Connecting to server') || message.includes('Connected to WebSocket')) {
+      color = '\x1b[36m'; 
     }
+
+    console.log(`${color}[${new Date().toISOString()}] ${message}\x1b[0m`);
+
+    if (data) console.log(data);
   }
   
   async startViewingAds() {
@@ -327,14 +346,12 @@ class WhiteBunnyBot {
   }
 }
 
-const token = process.env.TOKEN;
-const tgId = process.env.TG_ID;
 if (!token || !tgId) {
-  console.error('Please provide both TOKEN and TG_ID in the .env file');
+  console.error('Please provide TOKEN and TG_ID in data.txt');
   process.exit(1);
 }
 
-const bot = new WhiteBunnyBot(token, tgId);
+const bot = new WhiteBunnyBot(token, tgId, parallelAds, adViewInterval);
 bot.start().catch(console.error);
 
 process.on('SIGINT', () => {
