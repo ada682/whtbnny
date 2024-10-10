@@ -61,10 +61,8 @@ class WhiteBunnyBot {
         adViewTasks.push(this.viewAd());
       }
 
-      // Menjalankan semua task secara paralel
       await Promise.all(adViewTasks);
 
-      // Tunggu sebelum memulai batch berikutnya
       this.log(`Waiting ${this.adViewInterval / 1000} seconds before the next cycle...`);
       await new Promise(resolve => setTimeout(resolve, this.adViewInterval));
     }
