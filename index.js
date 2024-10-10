@@ -1,6 +1,7 @@
 const fs = require('fs');
 const WebSocket = require('ws');
 const axios = require('axios');
+const { exec } = require('child_process');
 
 function loadConfig() {
   const config = {};
@@ -319,13 +320,27 @@ class WhiteBunnyBot {
     this.stop();
     
     this.log('Restarting bot process...');
-    exec('node ' + process.argv[1], (error, stdout, stderr) => {
+    
+    const scriptPath = process.argv[1];
+    
+    const child = exec(`node "${scriptPath}"`, (error, stdout, stderr) => {
       if (error) {
         console.error(`Error restarting bot: ${error}`);
         return;
       }
-      process.exit(0);
     });
+
+    child.stdout.on('data', (data) => {
+      console.log(`New process output: ${data}`);
+    });
+
+    child.stderr.on('data', (data) => {
+      console.error(`New process error: ${data}`);
+    });
+
+    setTimeout(() => {
+      process.exit(0);
+    }, 1000);
   }
 
   handleMessage(message) {
