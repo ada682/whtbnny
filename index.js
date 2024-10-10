@@ -138,7 +138,7 @@ class WhiteBunnyBot {
 
         this.log('Ad view completed and reward claimed!');
     } catch (error) {
-        this.log('Skipping failed view ad:', error.message); // Log the failure and skip it
+        this.log('Skipping failed view ad:', error.message); 
     }
   }
   
