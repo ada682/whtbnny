@@ -69,53 +69,52 @@ class WhiteBunnyBot {
   }
 
   async viewAd() {
-    try {
-      const adResponse = await axios.get('https://api.adsgram.ai/adv', {
-        params: {
-          blockId: 1440,
-          tg_id: this.tgId,
-          tg_platform: 'tdesktop',
-          platform: 'Win32',
-          language: 'en',
-          is_premium: true
-        },
-        headers: this.headers
-      });
+      try {
+          const adResponse = await axios.get('https://api.adsgram.ai/adv', {
+              params: {
+                  blockId: 1440,
+                  tg_id: this.tgId,
+                  tg_platform: 'tdesktop',
+                  platform: 'Win32',
+                  language: 'en',
+                  is_premium: true
+              },
+              headers: this.headers
+          });
 
-      const adData = adResponse.data;
-      if (!adData || !adData.banner || !adData.banner.trackings) {
-        throw new Error('Invalid ad data received');
+          const adData = adResponse.data;
+          if (!adData || !adData.banner || !adData.banner.trackings) {
+              throw new Error('Invalid ad data received');
+          }
+
+          const trackings = {};
+          for (const tracking of adData.banner.trackings) {
+              trackings[tracking.name] = tracking.value;
+          }
+
+          if (!trackings.render || !trackings.show || !trackings.reward) {
+              throw new Error('Missing tracking URLs');
+          }
+
+          this.log('Starting to view ad...');
+          await axios.get(trackings.render, { headers: this.headers });
+          await axios.get(trackings.show, { headers: this.headers });
+
+          const adDuration = Math.floor(Math.random() * (32000 - 15000) + 15000);
+          await new Promise(resolve => setTimeout(resolve, adDuration));
+
+          const rewardResponse = await axios.get(trackings.reward, { headers: this.headers });
+          this.log('Reward response:', rewardResponse.data);
+
+          if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+              this.ws.send('42["checkTask",{"code":"rewardAds10000"}]');
+              this.log('Sent task check for rewardAds10000');
+          }
+
+          this.log('Ad view completed and reward claimed!');
+      } catch (error) {
+          this.log('Skipping failed view ad:', error.message);
       }
-
-      const trackings = {};
-      for (const tracking of adData.banner.trackings) {
-        trackings[tracking.name] = tracking.value;
-      }
-
-      if (!trackings.render || !trackings.show || !trackings.reward) {
-        throw new Error('Missing tracking URLs');
-      }
-
-      this.log('Starting to view ad...');
-      await axios.get(trackings.render, { headers: this.headers });
-      await axios.get(trackings.show, { headers: this.headers });
-
-      const adDuration = Math.floor(Math.random() * (32000 - 15000) + 15000);
-      await new Promise(resolve => setTimeout(resolve, adDuration));
-
-      const rewardResponse = await axios.get(trackings.reward, { headers: this.headers });
-      this.log('Reward response:', rewardResponse.data); 
-
-      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        this.ws.send('42["checkTask",{"code":"rewardAds10000"}]');
-        this.log('Sent task check for rewardAds10000');
-      }
-
-      this.log('Ad view completed and reward claimed!');
-    } catch (error) {
-      this.log('Error in viewAd:', error.message);
-      throw error;
-    }
   }
   
   startPingInterval() {
