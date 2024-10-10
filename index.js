@@ -49,6 +49,7 @@ class WhiteBunnyBot {
     this.adViewingInterval = null;
     this.lastAdTime = 0;
     this.adCooldown = 35000;
+    this.restartOnDisconnect = true;
   }
 
   log(message, data = null) {
@@ -302,9 +303,28 @@ class WhiteBunnyBot {
         this.log(`Disconnected: ${code}`);
         
         if (this.isRunning) {
-          await this.handleReconnect();
+          if (this.restartOnDisconnect) {
+            this.log('Initiating full bot restart...');
+            this.restartBot();
+          } else {
+            await this.handleReconnect();
+          }
         }
       });
+    });
+  }
+  
+  restartBot() {
+    this.log('Stopping current bot instance...');
+    this.stop();
+    
+    this.log('Restarting bot process...');
+    exec('node ' + process.argv[1], (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error restarting bot: ${error}`);
+        return;
+      }
+      process.exit(0);
     });
   }
 
@@ -339,7 +359,13 @@ class WhiteBunnyBot {
   }
 
   stop() {
-    super.stop();
+    this.isRunning = false;
+    if (this.ws) {
+      this.ws.terminate();
+    }
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval);
+    }
     if (this.adViewingInterval) {
       clearInterval(this.adViewingInterval);
     }
